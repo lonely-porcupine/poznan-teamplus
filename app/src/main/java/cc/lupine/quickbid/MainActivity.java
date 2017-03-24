@@ -1,5 +1,8 @@
 package cc.lupine.quickbid;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -9,11 +12,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.androidnetworking.AndroidNetworking;
 
 public class MainActivity extends AppCompatActivity implements BidlistFragment.OnFragmentInteractionListener {
-    private String TAG = "QuickBid";
+    private final String TAG = AppConfig.TAG;
 
-    private TextView mTextMessage;
+    SharedPreferences prefs = null;
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -24,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
             FragmentTransaction ft = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_bidlist:
-                    ft.replace(R.id.fragment_container, new BidlistFragment());
+                    ft.replace(R.id.fragment_container, BidlistFragment.newInstance());
                     break;
                 case R.id.navigation_watchlist:
                     break;
@@ -45,10 +52,35 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        AndroidNetworking.initialize(getApplicationContext());
+        this.prefs = AppUtils.getMainPrefs(getApplicationContext());
+        AppUtils.fetchAccessToken(new AppUtils.OnAccessTokenFetchInterface() {
+            @Override
+            public void onAccessTokenFetched() {
+                AppUtils.isLoggedIn(getApplicationContext(), new AppUtils.OnLoggedInResultInterface() {
+                    @Override
+                    public void isLoggedIn() {
+                        setContentView(R.layout.activity_main);
+                        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+                        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+                    }
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+                    @Override
+                    public void isNotLoggedIn() {
+                        // user not logged in, switch to loginactivity
+                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(i);
+                        finish();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(getApplication(), error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

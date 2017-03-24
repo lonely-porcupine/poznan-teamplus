@@ -4,7 +4,12 @@
     <string name="title_watchlist">Wathlist</string>
     <string name="title_wonlist">Won</string>
     <string name="title_settings">Settings</string>
+    <string name="username_or_email">Login or email</string>
+    <string name="password">Password</string>
+    <string name="signin">Sign in</string>
+    <string name="login_pass_empty">You need to enter your login and password</string>
+    <string name="invalid_login_pass">Invalid login or password</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">Hello blank fragment3</string>
 </resources>

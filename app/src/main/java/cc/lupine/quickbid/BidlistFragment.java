@@ -23,11 +23,10 @@ public class BidlistFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static BidlistFragment newInstance(String param1, String param2) {
+    public static BidlistFragment newInstance() {
         BidlistFragment fragment = new BidlistFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        //args.putString(ARG_PARAM1, param1);
         fragment.setArguments(args);
         return fragment;
     }
