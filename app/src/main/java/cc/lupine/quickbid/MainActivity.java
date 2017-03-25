@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.androidnetworking.AndroidNetworking;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-public class MainActivity extends AppCompatActivity implements BidlistFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements BidlistFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
     private final String TAG = AppConfig.TAG;
 
     SharedPreferences prefs = null;
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                     ft.replace(R.id.fragment_container, BidlistFragment.newInstance());
                     break;
                 case R.id.navigation_settings:
+                    ft.replace(R.id.fragment_container, SettingsFragment.newInstance());
                     break;
                 default:
                     Log.wtf(TAG, "This should never happen");
