@@ -73,6 +73,7 @@ public class AppUtils {
                     });
         } else if(mainPrefs.contains("access_token")) {
             AppUtils.accessToken = mainPrefs.getString("access_token", "");
+            intf.onAccessTokenFetched();
         }
     }
 

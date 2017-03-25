@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                 AppUtils.isLoggedIn(getApplicationContext(), new AppUtils.OnLoggedInResultInterface() {
                     @Override
                     public void isLoggedIn() {
+                        Log.d(TAG, "User logged in, proceeding with the launch");
                         setContentView(R.layout.activity_main);
                         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
                         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
