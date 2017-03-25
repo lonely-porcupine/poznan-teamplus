@@ -33,7 +33,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 am.bid(am.getBidPrice() + 1.0, new AuctionModel.OnBidInterface() {
                     @Override
                     public void onBidResult(String resp) {
-                        String notification_title = c.getString(R.string.bid_result);
+                        String notification_title = am.getName();
                         String notification_body = resp;
                         NotificationCompat.Builder mBuilder =
                                 new NotificationCompat.Builder(c)

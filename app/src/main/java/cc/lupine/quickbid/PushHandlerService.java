@@ -18,6 +18,9 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class PushHandlerService extends FirebaseMessagingService {
     private final String TAG = AppConfig.TAG;
 
@@ -41,35 +44,48 @@ public class PushHandlerService extends FirebaseMessagingService {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 
             try {
-                String notification_title = "";
-                String notification_body = "";
-                JSONObject data = new JSONObject(remoteMessage.getNotification().getBody());
-                switch(data.getInt("type")) {
-                    case 1:
-                        notification_title = getString(R.string.outbid);
-                        notification_body = getString(R.string.outbid_body);
-                        break;
-                }
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(this)
-                                .setSmallIcon(R.drawable.ic_home_black_24dp)
-                                .setContentTitle(notification_title)
-                                .setContentText(notification_body)
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(notification_body))
-                                .setDefaults(Notification.DEFAULT_ALL);
+                final JSONObject data = new JSONObject(remoteMessage.getNotification().getBody());
+                AuctionModel.newInstanceFromId(data.getString("auction_id"), new AuctionModel.FromIdInterface() {
+                    @Override
+                    public void onFetched(AuctionModel am) {
+                        try {
+                            String notification_title = am.getName();
+                            String notification_body = "";
+                            switch (data.getInt("type")) {
+                                case 1:
+                                    notification_body = getString(R.string.outbid_body, String.format("%.2f", am.getBidPrice()));
+                                    break;
+                                case 2:
+                                    long unixTime = System.currentTimeMillis() / 1000L;
+                                    long endTime = unixTime + am.getSecondsLeft();
+                                    java.util.Date date = new java.util.Date((long)endTime*1000);
+                                    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                                    notification_body = getString(R.string.ending_body, df.format(date), String.format("%.2f", am.getBidPrice()));
+                                    break;
+                            }
+                            NotificationCompat.Builder mBuilder =
+                                    new NotificationCompat.Builder(getBaseContext())
+                                            .setSmallIcon(R.drawable.ic_home_black_24dp)
+                                            .setContentTitle(notification_title)
+                                            .setContentText(notification_body)
+                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(notification_body))
+                                            .setDefaults(Notification.DEFAULT_ALL);
 
-                Intent iAction1 = new Intent(getBaseContext(), NotificationReceiver.class);
-                iAction1.setAction(data.getString("auction_id"));
-                PendingIntent piAction1 = PendingIntent.getBroadcast(this, 0, iAction1, PendingIntent.FLAG_CANCEL_CURRENT);
-                NotificationCompat.Action action = new NotificationCompat.Action.Builder(0, getString(R.string.bid), piAction1).build();
+                            Intent iAction1 = new Intent(getBaseContext(), NotificationReceiver.class);
+                            iAction1.setAction(am.getId());
+                            PendingIntent piAction1 = PendingIntent.getBroadcast(getBaseContext(), 0, iAction1, PendingIntent.FLAG_CANCEL_CURRENT);
 
-                //mBuilder.addAction(action);
 
-                mBuilder.addAction(0, getString(R.string.bid), piAction1);
-;
+                            mBuilder.addAction(0, getString(R.string.bid), piAction1);
 
-                NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                mNotifyMgr.notify(0, mBuilder.build());
+                            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            mNotifyMgr.notify(0, mBuilder.build());
+                        } catch (JSONException e) {
+                            Log.e(TAG, "JSON error from notification");
+                            e.printStackTrace();
+                        }
+                    }
+                });
             } catch (JSONException e) {
                 Log.e(TAG, "JSON error from notification");
                 e.printStackTrace();

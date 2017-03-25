@@ -13,12 +13,14 @@
     <string name="not_winning">Not winning</string>
     <string name="bid">Bid</string>
     <string name="outbid">You\'ve been outbid</string>
-    <string name="outbid_body">Your offer has been outbid. Bid now for a chance to win!</string>
+    <string name="outbid_body">Your offer has been outbid. Bid now for a chance to win! Current price: %1$s</string>
     <string name="bid_failure">There was an error while trying to bid the auction</string>
     <string name="bid_confirm">Are you sure?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="bid_error">There was an error while trying to place your bid</string>
     <string name="bid_result">Bid result</string>
+    <string name="ending_body">The auction is ending on %1$s. Don\'t miss your chance, bid now! Current price: %2$s</string>
+    <string name="loading">Loading…</string>
 
 </resources>

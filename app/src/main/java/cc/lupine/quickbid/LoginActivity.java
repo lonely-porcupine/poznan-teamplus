@@ -1,5 +1,6 @@
 package cc.lupine.quickbid;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
@@ -40,9 +41,15 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         btnSignin.setEnabled(false);
+        final ProgressDialog progressdialog = new ProgressDialog(this);
+        progressdialog.setMessage(getString(R.string.loading));
+        progressdialog.setIndeterminate(true);
+        progressdialog.setCancelable(false);
+        progressdialog.show();
         AppUtils.authenticate(login, password, new AppUtils.OnAuthenticationInterface() {
             @Override
             public void authenticated(String userid) {
+                progressdialog.hide();
                 SharedPreferences.Editor ed = AppUtils.getMainPrefs(getApplicationContext()).edit();
                 ed.putString("user_uname", login.charAt(0) + "..." + login.charAt(login.length()-1));
                 ed.commit();
@@ -54,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void notAuthenticated() {
+                progressdialog.hide();
                 Toast.makeText(getApplication(), R.string.invalid_login_pass, Toast.LENGTH_LONG).show();
                 btnSignin.setEnabled(true);
             }

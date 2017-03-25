@@ -34,10 +34,6 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                 case R.id.navigation_bidlist:
                     ft.replace(R.id.fragment_container, BidlistFragment.newInstance());
                     break;
-                case R.id.navigation_watchlist:
-                    break;
-                case R.id.navigation_wonlist:
-                    break;
                 case R.id.navigation_settings:
                     break;
                 default:
@@ -67,6 +63,12 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
                         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+                        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+                        FragmentManager fm = getSupportFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        ft.replace(R.id.fragment_container, BidlistFragment.newInstance());
+                        ft.commit();
                     }
 
                     @Override

@@ -1,5 +1,6 @@
 package cc.lupine.quickbid;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -63,9 +64,15 @@ public class BidlistFragment extends Fragment {
 
     public void fetchAuctionList() {
 
+        final ProgressDialog progressdialog = new ProgressDialog(getContext());
+        progressdialog.setMessage(getString(R.string.loading));
+        progressdialog.setIndeterminate(true);
+        progressdialog.setCancelable(false);
+        progressdialog.show();
         AuctionFetchHelper.fetchBidlist(new AuctionFetchHelper.OnListFetchInterface() {
             @Override
             public void onListFetched(ArrayList<AuctionModel> list) {
+                progressdialog.hide();
                 LinearLayout container = (LinearLayout) view.findViewById(R.id.list_container);
                 container.removeAllViews();
                 for(AuctionModel auction : list) {
