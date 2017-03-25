@@ -1,12 +1,16 @@
 package cc.lupine.quickbid;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -16,7 +20,8 @@ import org.json.JSONObject;
 
 public class PushHandlerService extends FirebaseMessagingService {
     private final String TAG = AppConfig.TAG;
-    public static final String ACTION1 = "BID";
+
+
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -47,14 +52,18 @@ public class PushHandlerService extends FirebaseMessagingService {
                 }
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(this)
-                                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                                .setSmallIcon(R.drawable.ic_home_black_24dp)
                                 .setContentTitle(notification_title)
                                 .setContentText(notification_body)
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(notification_body));
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(notification_body))
+                                .setDefaults(Notification.DEFAULT_ALL);
 
-                Intent iAction1 = new Intent(getBaseContext(), PushHandlerService.class);
-                iAction1.setAction(PushHandlerService.ACTION1);
-                PendingIntent piAction1 = PendingIntent.getService(this, 0, iAction1, 0);
+                Intent iAction1 = new Intent(getBaseContext(), NotificationReceiver.class);
+                iAction1.setAction(data.getString("auction_id"));
+                PendingIntent piAction1 = PendingIntent.getBroadcast(this, 0, iAction1, PendingIntent.FLAG_CANCEL_CURRENT);
+                NotificationCompat.Action action = new NotificationCompat.Action.Builder(0, getString(R.string.bid), piAction1).build();
+
+                //mBuilder.addAction(action);
 
                 mBuilder.addAction(0, getString(R.string.bid), piAction1);
 ;
@@ -68,7 +77,7 @@ public class PushHandlerService extends FirebaseMessagingService {
 
         }
 
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
+
     }
+
 }

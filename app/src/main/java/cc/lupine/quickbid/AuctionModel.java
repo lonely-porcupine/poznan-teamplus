@@ -20,7 +20,7 @@ import java.util.Map;
  */
 
 public class AuctionModel {
-    private final String TAG = AppConfig.TAG;
+    private static final String TAG = AppConfig.TAG;
 
     private String id;
     private String name;
@@ -56,6 +56,52 @@ public class AuctionModel {
         this.imageLarge = imageLarge;
         this.sellerName = sellerName;
         this.setHighestBidUname(highestBidUname);
+    }
+    public static void newInstanceFromId(String id, final FromIdInterface intf) {
+        AndroidNetworking.get("https://api.natelefon.pl/v1/allegro/offers/{offerid}")
+                .addPathParameter("offerid", id)
+                .addQueryParameter("access_token", AppUtils.getAccessToken())
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject offer) {
+                        try {
+                            String highestBidUname = "";
+                            try {
+                                System.out.println(offer.getJSONObject("bids").getJSONArray("highestBids"));
+                                highestBidUname = ((JSONObject)offer.getJSONObject("bids").getJSONArray("highestBids").get(0)).getString("login");
+                            } catch(Exception e) {}
+                            AuctionModel auction = new AuctionModel(
+                                    offer.getString("id"),
+                                    offer.getString("name"),
+                                    offer.getBoolean("buyNow"),
+                                    offer.getBoolean("auction"),
+                                    offer.getJSONObject("prices").optDouble("bid", 0.0),
+                                    offer.getJSONObject("prices").optDouble("buyNow", 0.0),
+                                    offer.getLong("secondsLeft"),
+                                    offer.getLong("endingTime"),
+                                    offer.getBoolean("tillOnStock"),
+                                    offer.getBoolean("allegroStandard"),
+                                    offer.getJSONObject("bids").getInt("count"),
+                                    offer.getJSONObject("mainImage").optString("small", ""),
+                                    offer.getJSONObject("mainImage").optString("medium", ""),
+                                    offer.getJSONObject("mainImage").optString("large", ""),
+                                    offer.getJSONObject("seller").optString("name", ""),
+                                    highestBidUname);
+                            intf.onFetched(auction);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "JSON Error occurred 3x");
+                            e.printStackTrace();
+                            System.out.println(offer);
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.e(TAG, "Error while obtaining auction");
+                        System.out.println(anError.getResponse());
+                    }
+                });
     }
 
     public String getId() {
@@ -323,5 +369,9 @@ public class AuctionModel {
     public interface OnBidInterface {
         void onBidResult(String resp);
         void onBidFailure();
+    }
+
+    public interface FromIdInterface {
+        void onFetched(AuctionModel am);
     }
 }

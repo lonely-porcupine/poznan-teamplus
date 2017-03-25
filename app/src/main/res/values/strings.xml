@@ -18,5 +18,7 @@
     <string name="bid_confirm">Are you sure?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="bid_error">There was an error while trying to place your bid</string>
+    <string name="bid_result">Bid result</string>
 
 </resources>
