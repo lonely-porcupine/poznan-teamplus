@@ -9,7 +9,7 @@
     <string name="signin">Sign in</string>
     <string name="login_pass_empty">You need to enter your login and password</string>
     <string name="invalid_login_pass">Invalid login or password</string>
+    <string name="winning">You\'re winning!</string>
+    <string name="not_winning">Not winning</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment3</string>
 </resources>

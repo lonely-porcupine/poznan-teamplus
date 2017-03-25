@@ -37,8 +37,10 @@ public class AuctionModel {
     private String imageMedium;
     private String imageLarge;
     private String sellerName;
+    private ArrayList<String> highestBids;
+    private Boolean isWinning;
 
-    public AuctionModel(String id, String name, Boolean buyNow, Boolean auction, double bidPrice, double buyNowPrice, long secondsLeft, long endingTime, Boolean tillOnStock, Boolean allegroStandard, int bidsCount, String imageSmall, String imageMedium, String imageLarge, String sellerName) {
+    public AuctionModel(String id, String name, Boolean buyNow, Boolean auction, double bidPrice, double buyNowPrice, long secondsLeft, long endingTime, Boolean tillOnStock, Boolean allegroStandard, int bidsCount, String imageSmall, String imageMedium, String imageLarge, String sellerName, ArrayList<String> highestBids) {
         this.id = id;
         this.name = name;
         this.buyNow = buyNow;
@@ -54,6 +56,7 @@ public class AuctionModel {
         this.imageMedium = imageMedium;
         this.imageLarge = imageLarge;
         this.sellerName = sellerName;
+        this.setHighestBids(highestBids);
     }
 
     public String getId() {
@@ -176,10 +179,30 @@ public class AuctionModel {
         this.sellerName = sellerName;
     }
 
+    public ArrayList<String> getHighestBids() {
+        return highestBids;
+    }
+
+    public void setHighestBids(ArrayList<String> highestBids) {
+        this.highestBids = highestBids;
+        this.isWinning = false;
+        for(String bid : highestBids) {
+            if (AppUtils.getMainPrefs(null).getString("user_id", "").equals(bid))
+                this.isWinning = true;
+        }
+    }
+
+    public Boolean getWinning() {
+        return isWinning;
+    }
+
     public void subscribe(final OnSubscribeInterface intf) {
-        AndroidNetworking.post("https://d.lupime.cc/api/test/qb/register.php")
+        Log.i(TAG, "Subscribing");
+        final String aid = this.getId();
+        Log.d(TAG, "AID " + aid);
+        AndroidNetworking.post(DrutCommunication.REGISTER_URL)
                 .addBodyParameter("token", AppUtils.getMainPrefs(null).getString("push_key", ""))
-                .addBodyParameter("auction_id", this.getId())
+                .addBodyParameter("auction_id", aid)
                 .addBodyParameter("notify_outbid", AppUtils.getMainPrefs(null).getBoolean("notify_outbid", true) ? "1" : "0")
                 .addBodyParameter("notify_ending", AppUtils.getMainPrefs(null).getBoolean("notify_ending", true) ? "1" : "0")
                 .build()
@@ -191,11 +214,13 @@ public class AuctionModel {
                         if(resp < 1)
                             intf.onError();
                         else {
-                            //Map<String, ArrayList<String>> subs = new HashMap<>();
+                            Log.d(TAG, "AID2 " + aid);
                             String subscribed = AppUtils.getMainPrefs(null).getString("subscribed", "");
+                            Log.d(TAG, "SED " + subscribed);
                             SharedPreferences.Editor ed = AppUtils.getMainPrefs(null).edit();
-                            Map<String, Integer> subs = AppUtils.parseStringSubs(subscribed);
-                            subs.put(AuctionModel.this.getId(), resp);
+                            HashMap<String, Integer> subs = AppUtils.parseStringSubs(subscribed);
+                            subs.put(aid, resp);
+                            System.out.println(subs);
                             ed.putString("subscribed", AppUtils.subsToString(subs));
                             ed.commit();
                             intf.onSubscribed(resp);
@@ -212,8 +237,56 @@ public class AuctionModel {
                 });
     }
 
+    public void unsubscribe(final OnUnsubscribeInterface intf) {
+        Log.i(TAG, "Unsubscribing");
+        final String aid = this.getId();
+        AndroidNetworking.post(DrutCommunication.DEREGISTER_URL)
+                .addBodyParameter("auction_id", aid)
+                .addBodyParameter("sub_id", "" + AppUtils.parseStringSubs(AppUtils.getMainPrefs(null).getString("subscribed", "")).get(this.getId()))
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String str) {
+                        Log.i(TAG, "Server response: " + str);
+                        int resp = Integer.valueOf(str);
+                        if(resp < 0)
+                            intf.onError();
+                        else {
+                            String subscribed = AppUtils.getMainPrefs(null).getString("subscribed", "");
+                            SharedPreferences.Editor ed = AppUtils.getMainPrefs(null).edit();
+                            HashMap<String, Integer> subs = AppUtils.parseStringSubs(subscribed);
+                            subs.remove(aid);
+                            ed.putString("subscribed", AppUtils.subsToString(subs));
+                            ed.commit();
+                            intf.onUnsubscribed();
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.e(TAG, "Error while unsubscribing");
+                        System.out.println(anError);
+                        System.out.println(anError.getResponse());
+                        intf.onError();
+                    }
+                });
+    }
+
+    public Boolean isSubscribed() {
+        String subscribed = AppUtils.getMainPrefs(null).getString("subscribed", "");
+        HashMap<String, Integer> subs = AppUtils.parseStringSubs(subscribed);
+        if(subs.containsKey(this.getId()))
+            return true;
+        return false;
+    }
+
     public interface OnSubscribeInterface {
         void onSubscribed(int resp);
+        void onError();
+    }
+
+    public interface OnUnsubscribeInterface {
+        void onUnsubscribed();
         void onError();
     }
 }

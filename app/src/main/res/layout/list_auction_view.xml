@@ -12,6 +12,7 @@
     android:foreground="?android:attr/selectableItemBackground">
 
     <RelativeLayout
+        android:id="@+id/clickable_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

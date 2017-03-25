@@ -10,10 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnItemClickListener;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class BidlistFragment extends Fragment {
@@ -55,19 +58,64 @@ public class BidlistFragment extends Fragment {
             public void onListFetched(ArrayList<AuctionModel> list) {
                 LinearLayout container = (LinearLayout) view.findViewById(R.id.list_container);
                 for(AuctionModel auction : list) {
-                    ListAuctionView lav = new ListAuctionView(getActivity());
+                    final ListAuctionView lav = new ListAuctionView(getActivity());
                     lav.setPhotoURL(auction.getImageMedium());
                     lav.setTitle(auction.getName());
                     lav.setPrice(String.format("%.2f zł", auction.getBidPrice()));
+                    if(auction.getWinning())
+                        lav.setWinning(getString(R.string.winning));
+                    else
+                        lav.setWinning(getString(R.string.not_winning));
+                    long unixTime = System.currentTimeMillis() / 1000L;
+                    long endTime = unixTime + auction.getSecondsLeft();
+                    java.util.Date date = new java.util.Date((long)endTime*1000);
+                    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                    lav.setTimeLeft(df.format(date));
+                    lav.setModel(auction);
+                    final RelativeLayout clickable_container = (RelativeLayout) lav.findViewById(R.id.clickable_container);
 
-                    lav.setOnClickListener(new View.OnClickListener() {
+                    clickable_container.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            Log.d(TAG, "Clicked");
+                            if(!lav.getModel().isSubscribed()) {
+                                Log.d(TAG, "Not subscribed");
+                                lav.getModel().subscribe(new AuctionModel.OnSubscribeInterface() {
+                                    @Override
+                                    public void onSubscribed(int resp) {
+                                        Log.i(TAG, "Successfully subscribed, dbid " + resp);
+                                        lav.ungray();
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.e(TAG, "Could not subscribe");
+                                    }
+                                });
+                            } else {
+                                Log.d(TAG, "Subscribed");
+                                lav.getModel().unsubscribe(new AuctionModel.OnUnsubscribeInterface() {
+                                    @Override
+                                    public void onUnsubscribed() {
+                                        Log.i(TAG, "Successfully unsubscribed");
+                                        lav.grayOut();
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.e(TAG, "Could not unsubscribe");
+                                    }
+                                });
+                            }
                         }
                     });
 
+                    if(!lav.getModel().isSubscribed())
+                        lav.grayOut();
+                    else
+                        lav.ungray();
+
                     container.addView(lav);
-                    container.addView(new ListAuctionView(getActivity()));
                 }
             }
         });

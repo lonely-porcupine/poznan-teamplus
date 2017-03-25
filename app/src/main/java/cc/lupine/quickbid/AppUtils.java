@@ -158,12 +158,17 @@ public class AppUtils {
     }
 
     public static HashMap<String, Integer> parseStringSubs(String subs) {
-        Map<String, Integer> map = new HashMap<>();
+        HashMap<String, Integer> map = new HashMap<>();
         String[] l = subs.split(";");
         for(String line : l) {
+            Log.w(TAG, line);
             String[] data = line.split(",");
-
+            if(data.length == 2)
+                map.put(data[0], Integer.valueOf(data[1]));
         }
+        Log.i(TAG, "pss");
+        System.out.println(map);
+        return map;
     }
 
     public static String subsToString(HashMap<String, Integer> subs) {
@@ -174,9 +179,12 @@ public class AppUtils {
             gen += key;
             gen += ",";
             gen += val;
-            gen += ";"
+            gen += ";";
             i++;
         }
+        Log.i(TAG, "sts");
+        System.out.println(gen);
+        return gen;
     }
 
     private static String hashPassword(String password) {

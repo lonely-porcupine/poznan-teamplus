@@ -29,6 +29,8 @@ public class ListAuctionView extends CardView {
     public TextView timeLeftView;
     public TextView winningView;
 
+    private AuctionModel model;
+
     public ListAuctionView(Context context) {
         super(context);
         mInflater = LayoutInflater.from(context);
@@ -77,4 +79,25 @@ public class ListAuctionView extends CardView {
         this.winningView.setText(win);
     }
 
+    public AuctionModel getModel() {
+        return model;
+    }
+
+    public void setModel(AuctionModel model) {
+        this.model = model;
+    }
+
+    public void grayOut() {
+        this.titleView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_disabled_material_light));
+        this.priceView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_disabled_material_light));
+        this.timeLeftView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_disabled_material_light));
+        this.winningView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_disabled_material_light));
+    }
+
+    public void ungray() {
+        this.titleView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_default_material_light));
+        this.priceView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_default_material_light));
+        this.timeLeftView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_default_material_light));
+        this.winningView.setTextColor(getResources().getColor(android.support.v7.appcompat.R.color.primary_text_default_material_light));
+    }
 }

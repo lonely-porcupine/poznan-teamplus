@@ -39,8 +39,8 @@ public class AuctionFetchHelper {
                 .build()
                 .getAsJSONObject(new JSONObjectRequestListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        ArrayList<AuctionModel> list = new ArrayList<>();
+                    public void onResponse(final JSONObject response) {
+                        final ArrayList<AuctionModel> list = new ArrayList<>();
                         try {
                             if(!response.has("count")) {
                                 Log.e(TAG, "invalid response");
@@ -52,26 +52,62 @@ public class AuctionFetchHelper {
                             Log.d(TAG, "Fetched " + auctionCount + " auctions");
                             JSONArray offers = response.getJSONArray("offers");
                             for(int i = 0; i < offers.length(); i++) {
-                                JSONObject offer = (JSONObject) offers.get(i);
-                                AuctionModel auction = new AuctionModel(
-                                        offer.getString("id"),
-                                        offer.getString("name"),
-                                        offer.getBoolean("buyNow"),
-                                        offer.getBoolean("auction"),
-                                        offer.getJSONObject("prices").optDouble("bid", 0.0),
-                                        offer.getJSONObject("prices").optDouble("buyNow", 0.0),
-                                        offer.getLong("secondsLeft"),
-                                        offer.getLong("endingTime"),
-                                        offer.getBoolean("tillOnStock"),
-                                        offer.getBoolean("allegroStandard"),
-                                        offer.getJSONObject("bids").getInt("count"),
-                                        offer.getJSONObject("mainImage").optString("small", ""),
-                                        offer.getJSONObject("mainImage").optString("medium", ""),
-                                        offer.getJSONObject("mainImage").optString("large", ""),
-                                        offer.getJSONObject("seller").optString("name", ""));
-                                list.add(auction);
+                                final Boolean isLast = (i == offers.length()-1) ? true : false;
+                                final JSONObject offer = (JSONObject) offers.get(i);
+
+                                AndroidNetworking.get("https://api.natelefon.pl/v1/allegro/offers/{offerid}")
+                                        .addPathParameter("offerid", offer.getString("id"))
+                                        .addQueryParameter("access_token", AppUtils.getAccessToken())
+                                        .addQueryParameter("limit", "200")
+                                        .build()
+                                        .getAsJSONObject(new JSONObjectRequestListener() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                try {
+                                                    ArrayList<String> highestBids = new ArrayList<>();
+                                                    try {
+                                                        for(int i = 0; i < response.getJSONObject("bids").getJSONArray("highestBids").length(); i++) {
+                                                            highestBids.add(((JSONObject)response.getJSONObject("bids").getJSONArray("highestBids").get(i)).getString("id"));
+                                                        }
+                                                    } catch(Exception e) {}
+                                                    AuctionModel auction = new AuctionModel(
+                                                            offer.getString("id"),
+                                                            offer.getString("name"),
+                                                            offer.getBoolean("buyNow"),
+                                                            offer.getBoolean("auction"),
+                                                            offer.getJSONObject("prices").optDouble("bid", 0.0),
+                                                            offer.getJSONObject("prices").optDouble("buyNow", 0.0),
+                                                            offer.getLong("secondsLeft"),
+                                                            offer.getLong("endingTime"),
+                                                            offer.getBoolean("tillOnStock"),
+                                                            offer.getBoolean("allegroStandard"),
+                                                            offer.getJSONObject("bids").getInt("count"),
+                                                            offer.getJSONObject("mainImage").optString("small", ""),
+                                                            offer.getJSONObject("mainImage").optString("medium", ""),
+                                                            offer.getJSONObject("mainImage").optString("large", ""),
+                                                            offer.getJSONObject("seller").optString("name", ""),
+                                                            highestBids);
+                                                        list.add(auction);
+                                                    if(isLast)
+                                                        intf.onListFetched(list);
+                                                } catch (JSONException e) {
+                                                    Log.e(TAG, "JSON Error occurred 3");
+                                                    e.printStackTrace();
+                                                    System.out.println(response);
+                                                    intf.onListFetched(list);
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onError(ANError anError) {
+                                                Log.e(TAG, "Error while obtaining auction list");
+                                                System.out.println(anError.getResponse());
+                                                ArrayList<AuctionModel> list = new ArrayList<>();
+                                                intf.onListFetched(list);
+                                            }
+                                        });
+
                             }
-                            intf.onListFetched(list);
                         } catch (JSONException e) {
                             Log.e(TAG, "JSON Error occurred 3");
                             e.printStackTrace();
