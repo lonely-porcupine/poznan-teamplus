@@ -158,4 +158,13 @@ public class AuctionModel {
     public void setSellerName(String sellerName) {
         this.sellerName = sellerName;
     }
+
+    public void subscribe(OnSubscribeInterface intf) {
+        
+    }
+
+    public interface OnSubscribeInterface {
+        void onSubscribed();
+        void onError();
+    }
 }

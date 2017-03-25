@@ -8,6 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.LinearLayout;
+
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.OnItemClickListener;
 
 import java.util.ArrayList;
 
@@ -44,11 +49,27 @@ public class BidlistFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Log.i(TAG, "onCreateView BLF");
-        View view = inflater.inflate(R.layout.fragment_bidlist, container, false);
+        final View view = inflater.inflate(R.layout.fragment_bidlist, container, false);
         AuctionFetchHelper.fetchBidlist(new AuctionFetchHelper.OnListFetchInterface() {
             @Override
             public void onListFetched(ArrayList<AuctionModel> list) {
-                ArrayList<AuctionModel> auctions = list;
+                LinearLayout container = (LinearLayout) view.findViewById(R.id.list_container);
+                for(AuctionModel auction : list) {
+                    ListAuctionView lav = new ListAuctionView(getActivity());
+                    lav.setPhotoURL(auction.getImageMedium());
+                    lav.setTitle(auction.getName());
+                    lav.setPrice(String.format("%.2f zł", auction.getBidPrice()));
+
+                    lav.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            auction.subscribe()
+                        }
+                    });
+
+                    container.addView(lav);
+                    container.addView(new ListAuctionView(getActivity()));
+                }
             }
         });
         return view;
