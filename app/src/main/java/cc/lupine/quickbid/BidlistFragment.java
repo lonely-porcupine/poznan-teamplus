@@ -75,6 +75,7 @@ public class BidlistFragment extends Fragment {
                 progressdialog.hide();
                 LinearLayout container = (LinearLayout) view.findViewById(R.id.list_container);
                 container.removeAllViews();
+                Log.d(TAG, "List len: " + list.size());
                 for(AuctionModel auction : list) {
                     final ListAuctionView lav = new ListAuctionView(getActivity());
                     lav.setPhotoURL(auction.getImageMedium());

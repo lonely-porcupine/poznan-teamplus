@@ -3,6 +3,7 @@ package cc.lupine.quickbid;
 import android.util.Log;
 
 import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
 
@@ -50,7 +51,8 @@ public class AuctionFetchHelper {
                             }
                             final int auctionCount = response.getInt("count");
                             Log.d(TAG, "Fetched " + auctionCount + " auctions");
-                            JSONArray offers = response.getJSONArray("offers");
+                            final JSONArray offers = response.getJSONArray("offers");
+                            Log.d(TAG, "Offers len " + offers.length());
                             for(int i = 0; i < offers.length(); i++) {
                                 final Boolean isLast = (i == offers.length()-1) ? true : false;
                                 final JSONObject offer = (JSONObject) offers.get(i);
@@ -58,7 +60,7 @@ public class AuctionFetchHelper {
                                 AndroidNetworking.get("https://api.natelefon.pl/v1/allegro/offers/{offerid}")
                                         .addPathParameter("offerid", offer.getString("id"))
                                         .addQueryParameter("access_token", AppUtils.getAccessToken())
-                                        .addQueryParameter("limit", "200")
+                                        .setPriority(Priority.IMMEDIATE)
                                         .build()
                                         .getAsJSONObject(new JSONObjectRequestListener() {
                                             @Override
@@ -87,7 +89,7 @@ public class AuctionFetchHelper {
                                                             offer.getJSONObject("seller").optString("name", ""),
                                                             highestBidUname);
                                                         list.add(auction);
-                                                    if(isLast)
+                                                    if(list.size() == offers.length())
                                                         intf.onListFetched(list);
                                                 } catch (JSONException e) {
                                                     Log.e(TAG, "JSON Error occurred 3");
