@@ -65,7 +65,7 @@ public class PushHandlerService extends FirebaseMessagingService {
                             }
                             NotificationCompat.Builder mBuilder =
                                     new NotificationCompat.Builder(getBaseContext())
-                                            .setSmallIcon(R.drawable.ic_home_black_24dp)
+                                            .setSmallIcon(R.mipmap.ic_launcher)
                                             .setContentTitle(notification_title)
                                             .setContentText(notification_body)
                                             .setStyle(new NotificationCompat.BigTextStyle().bigText(notification_body))

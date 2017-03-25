@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
                         getSupportActionBar().setDisplayShowHomeEnabled(true);
+                        getSupportActionBar().setIcon(getDrawable(R.mipmap.ic_launcher));
+                        getSupportActionBar().setTitle("   QuickBid");
 
                         FragmentManager fm = getSupportFragmentManager();
                         FragmentTransaction ft = fm.beginTransaction();

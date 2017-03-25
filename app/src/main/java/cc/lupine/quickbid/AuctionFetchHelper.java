@@ -67,7 +67,7 @@ public class AuctionFetchHelper {
                                                     String highestBidUname = "";
                                                     try {
                                                         System.out.println(response.getJSONObject("bids").getJSONArray("highestBids"));
-                                                        highestBidUname = ((JSONObject)response.getJSONObject("bids").getJSONArray("highestBids").get(0)).getString("login"));
+                                                        highestBidUname = ((JSONObject)response.getJSONObject("bids").getJSONArray("highestBids").get(0)).getString("login");
                                                     } catch(Exception e) {}
                                                     AuctionModel auction = new AuctionModel(
                                                             offer.getString("id"),
