@@ -1,6 +1,7 @@
 package cc.lupine.quickbid;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void authenticate() {
-        String login = edtLogin.getText().toString();
+        final String login = edtLogin.getText().toString();
         String password = edtPassword.getText().toString();
         if(login.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, getString(R.string.login_pass_empty), Toast.LENGTH_LONG).show();
@@ -42,6 +43,9 @@ public class LoginActivity extends AppCompatActivity {
         AppUtils.authenticate(login, password, new AppUtils.OnAuthenticationInterface() {
             @Override
             public void authenticated(String userid) {
+                SharedPreferences.Editor ed = AppUtils.getMainPrefs(getApplicationContext()).edit();
+                ed.putString("user_uname", login.charAt(0) + "..." + login.charAt(login.length()-1));
+                ed.commit();
                 Log.d(TAG, "User authenticated, opening MainActivity");
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);

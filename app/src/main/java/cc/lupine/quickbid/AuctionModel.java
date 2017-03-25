@@ -37,10 +37,9 @@ public class AuctionModel {
     private String imageMedium;
     private String imageLarge;
     private String sellerName;
-    private ArrayList<String> highestBids;
-    private Boolean isWinning;
+    private String highestBidUname;
 
-    public AuctionModel(String id, String name, Boolean buyNow, Boolean auction, double bidPrice, double buyNowPrice, long secondsLeft, long endingTime, Boolean tillOnStock, Boolean allegroStandard, int bidsCount, String imageSmall, String imageMedium, String imageLarge, String sellerName, ArrayList<String> highestBids) {
+    public AuctionModel(String id, String name, Boolean buyNow, Boolean auction, double bidPrice, double buyNowPrice, long secondsLeft, long endingTime, Boolean tillOnStock, Boolean allegroStandard, int bidsCount, String imageSmall, String imageMedium, String imageLarge, String sellerName, String highestBidUname) {
         this.id = id;
         this.name = name;
         this.buyNow = buyNow;
@@ -56,7 +55,7 @@ public class AuctionModel {
         this.imageMedium = imageMedium;
         this.imageLarge = imageLarge;
         this.sellerName = sellerName;
-        this.setHighestBids(highestBids);
+        this.setHighestBidUname(highestBidUname);
     }
 
     public String getId() {
@@ -179,21 +178,18 @@ public class AuctionModel {
         this.sellerName = sellerName;
     }
 
-    public ArrayList<String> getHighestBids() {
-        return highestBids;
+    public String getHighestBidUname() {
+        return highestBidUname;
     }
 
-    public void setHighestBids(ArrayList<String> highestBids) {
-        this.highestBids = highestBids;
-        this.isWinning = false;
-        for(String bid : highestBids) {
-            if (AppUtils.getMainPrefs(null).getString("user_id", "").equals(bid))
-                this.isWinning = true;
-        }
+    public void setHighestBidUname(String highestBidUname) {
+        this.highestBidUname = highestBidUname;
     }
 
     public Boolean getWinning() {
-        return isWinning;
+        Log.d(TAG, "uname " + AppUtils.getMainPrefs(null).getString("user_uname", ""));
+        Log.d(TAG, "highest " + highestBidUname);
+        return AppUtils.getMainPrefs(null).getString("user_uname", "").equals(highestBidUname);
     }
 
     public void subscribe(final OnSubscribeInterface intf) {
@@ -280,6 +276,40 @@ public class AuctionModel {
         return false;
     }
 
+    public void bid(double price, final OnBidInterface intf) {
+        Log.i(TAG, "Bidding for " + price);
+        AndroidNetworking.post("https://api.natelefon.pl/v1/allegro/offers/{offerId}/bid")
+                .addPathParameter("offerId", this.getId())
+                .addBodyParameter("access_token", AppUtils.getAccessToken())
+                .addBodyParameter("quantity", "1")
+                .addBodyParameter("price", "" + price)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            System.out.println(response);
+                            if(response.has("message")) {
+                                intf.onBidResult(response.getString("message"));
+                            } else {
+                                intf.onBidFailure();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "JSON error x");
+                            System.out.println(response);
+                            intf.onBidFailure();
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.e(TAG, "Error while bidding");
+                        System.out.println(anError.getResponse());
+                        intf.onBidFailure();
+                    }
+                });
+    }
+
     public interface OnSubscribeInterface {
         void onSubscribed(int resp);
         void onError();
@@ -288,5 +318,10 @@ public class AuctionModel {
     public interface OnUnsubscribeInterface {
         void onUnsubscribed();
         void onError();
+    }
+
+    public interface OnBidInterface {
+        void onBidResult(String resp);
+        void onBidFailure();
     }
 }

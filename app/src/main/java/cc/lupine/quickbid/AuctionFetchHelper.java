@@ -64,11 +64,10 @@ public class AuctionFetchHelper {
                                             @Override
                                             public void onResponse(JSONObject response) {
                                                 try {
-                                                    ArrayList<String> highestBids = new ArrayList<>();
+                                                    String highestBidUname = "";
                                                     try {
-                                                        for(int i = 0; i < response.getJSONObject("bids").getJSONArray("highestBids").length(); i++) {
-                                                            highestBids.add(((JSONObject)response.getJSONObject("bids").getJSONArray("highestBids").get(i)).getString("id"));
-                                                        }
+                                                        System.out.println(response.getJSONObject("bids").getJSONArray("highestBids"));
+                                                        highestBidUname = ((JSONObject)response.getJSONObject("bids").getJSONArray("highestBids").get(0)).getString("login");
                                                     } catch(Exception e) {}
                                                     AuctionModel auction = new AuctionModel(
                                                             offer.getString("id"),
@@ -86,7 +85,7 @@ public class AuctionFetchHelper {
                                                             offer.getJSONObject("mainImage").optString("medium", ""),
                                                             offer.getJSONObject("mainImage").optString("large", ""),
                                                             offer.getJSONObject("seller").optString("name", ""),
-                                                            highestBids);
+                                                            highestBidUname);
                                                         list.add(auction);
                                                     if(isLast)
                                                         intf.onListFetched(list);

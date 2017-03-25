@@ -11,5 +11,12 @@
     <string name="invalid_login_pass">Invalid login or password</string>
     <string name="winning">You\'re winning!</string>
     <string name="not_winning">Not winning</string>
+    <string name="bid">Bid</string>
+    <string name="outbid">You\'ve been outbid</string>
+    <string name="outbid_body">Your offer has been outbid. Bid now for a chance to win!</string>
+    <string name="bid_failure">There was an error while trying to bid the auction</string>
+    <string name="bid_confirm">Are you sure?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

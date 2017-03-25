@@ -1,9 +1,11 @@
 package cc.lupine.quickbid;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnItemClickListener;
@@ -25,6 +28,7 @@ public class BidlistFragment extends Fragment {
 
 
     private OnFragmentInteractionListener mListener;
+    private View view;
 
     public BidlistFragment() {
         // Required empty public constructor
@@ -52,11 +56,18 @@ public class BidlistFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Log.i(TAG, "onCreateView BLF");
-        final View view = inflater.inflate(R.layout.fragment_bidlist, container, false);
+        view = inflater.inflate(R.layout.fragment_bidlist, container, false);
+        this.fetchAuctionList();
+        return view;
+    }
+
+    public void fetchAuctionList() {
+
         AuctionFetchHelper.fetchBidlist(new AuctionFetchHelper.OnListFetchInterface() {
             @Override
             public void onListFetched(ArrayList<AuctionModel> list) {
                 LinearLayout container = (LinearLayout) view.findViewById(R.id.list_container);
+                container.removeAllViews();
                 for(AuctionModel auction : list) {
                     final ListAuctionView lav = new ListAuctionView(getActivity());
                     lav.setPhotoURL(auction.getImageMedium());
@@ -110,6 +121,47 @@ public class BidlistFragment extends Fragment {
                         }
                     });
 
+                    clickable_container.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which){
+                                        case DialogInterface.BUTTON_POSITIVE:
+                                            lav.getModel().bid(lav.getModel().getBidPrice() + 1.0, new AuctionModel.OnBidInterface() {
+                                                @Override
+                                                public void onBidResult(String resp) {
+                                                    Log.i(TAG, "Bid result: " + resp);
+                                                    Toast.makeText(getContext(), resp, Toast.LENGTH_LONG).show();
+                                                    BidlistFragment.this.fetchAuctionList();
+                                                }
+
+                                                @Override
+                                                public void onBidFailure() {
+                                                    Log.i(TAG, "Bid failed");
+                                                    Toast.makeText(getContext(), getString(R.string.bid_failure), Toast.LENGTH_LONG).show();
+                                                    BidlistFragment.this.fetchAuctionList();
+
+                                                }
+                                            });
+                                            break;
+
+                                        case DialogInterface.BUTTON_NEGATIVE:
+                                            //No button clicked
+                                            break;
+                                    }
+                                }
+                            };
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setMessage(getString(R.string.bid_confirm)).setPositiveButton(getString(R.string.yes), dialogClickListener)
+                                    .setNegativeButton(getString(R.string.no), dialogClickListener).show();
+
+                            return true;
+                        }
+                    });
+
                     if(!lav.getModel().isSubscribed())
                         lav.grayOut();
                     else
@@ -119,9 +171,7 @@ public class BidlistFragment extends Fragment {
                 }
             }
         });
-        return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
