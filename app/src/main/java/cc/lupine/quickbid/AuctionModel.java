@@ -1,10 +1,27 @@
 package cc.lupine.quickbid;
 
+import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.androidnetworking.interfaces.StringRequestListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by maciej on 25/03/2017.
  */
 
 public class AuctionModel {
+    private final String TAG = AppConfig.TAG;
+
     private String id;
     private String name;
     private Boolean buyNow;
@@ -159,12 +176,44 @@ public class AuctionModel {
         this.sellerName = sellerName;
     }
 
-    public void subscribe(OnSubscribeInterface intf) {
-        
+    public void subscribe(final OnSubscribeInterface intf) {
+        AndroidNetworking.post("https://d.lupime.cc/api/test/qb/register.php")
+                .addBodyParameter("token", AppUtils.getMainPrefs(null).getString("push_key", ""))
+                .addBodyParameter("auction_id", this.getId())
+                .addBodyParameter("notify_outbid", AppUtils.getMainPrefs(null).getBoolean("notify_outbid", true) ? "1" : "0")
+                .addBodyParameter("notify_ending", AppUtils.getMainPrefs(null).getBoolean("notify_ending", true) ? "1" : "0")
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String str) {
+                        Log.i(TAG, "Server response: " + str);
+                        int resp = Integer.valueOf(str);
+                        if(resp < 1)
+                            intf.onError();
+                        else {
+                            //Map<String, ArrayList<String>> subs = new HashMap<>();
+                            String subscribed = AppUtils.getMainPrefs(null).getString("subscribed", "");
+                            SharedPreferences.Editor ed = AppUtils.getMainPrefs(null).edit();
+                            Map<String, Integer> subs = AppUtils.parseStringSubs(subscribed);
+                            subs.put(AuctionModel.this.getId(), resp);
+                            ed.putString("subscribed", AppUtils.subsToString(subs));
+                            ed.commit();
+                            intf.onSubscribed(resp);
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.e(TAG, "Error while subscribing");
+                        System.out.println(anError);
+                        System.out.println(anError.getResponse());
+                        intf.onError();
+                    }
+                });
     }
 
     public interface OnSubscribeInterface {
-        void onSubscribed();
+        void onSubscribed(int resp);
         void onError();
     }
 }

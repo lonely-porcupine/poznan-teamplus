@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidnetworking.AndroidNetworking;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class MainActivity extends AppCompatActivity implements BidlistFragment.OnFragmentInteractionListener {
     private final String TAG = AppConfig.TAG;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
         super.onCreate(savedInstanceState);
         AndroidNetworking.initialize(getApplicationContext());
         this.prefs = AppUtils.getMainPrefs(getApplicationContext());
+        Log.d(TAG, "Push token " + prefs.getString("push_key", "none"));
         AppUtils.fetchAccessToken(new AppUtils.OnAccessTokenFetchInterface() {
             @Override
             public void onAccessTokenFetched() {
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements BidlistFragment.O
                         setContentView(R.layout.activity_main);
                         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
                         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
                     }
 
                     @Override

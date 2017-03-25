@@ -17,6 +17,9 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by maciej on 24/03/2017.
@@ -152,6 +155,28 @@ public class AppUtils {
                         intf.notAuthenticated();
                     }
                 });
+    }
+
+    public static HashMap<String, Integer> parseStringSubs(String subs) {
+        Map<String, Integer> map = new HashMap<>();
+        String[] l = subs.split(";");
+        for(String line : l) {
+            String[] data = line.split(",");
+
+        }
+    }
+
+    public static String subsToString(HashMap<String, Integer> subs) {
+        int i = 0;
+        String gen = "";
+        for(String key : subs.keySet()) {
+            Integer val = (Integer) subs.values().toArray()[i];
+            gen += key;
+            gen += ",";
+            gen += val;
+            gen += ";"
+            i++;
+        }
     }
 
     private static String hashPassword(String password) {

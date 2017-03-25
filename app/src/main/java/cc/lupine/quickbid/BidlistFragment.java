@@ -63,7 +63,6 @@ public class BidlistFragment extends Fragment {
                     lav.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            auction.subscribe()
                         }
                     });
 

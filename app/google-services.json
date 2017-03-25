@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "728987403807",
+    "firebase_url": "https://quickbid-cf253.firebaseio.com",
+    "project_id": "quickbid-cf253",
+    "storage_bucket": "quickbid-cf253.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728987403807:android:ef4d5ed695c59000",
+        "android_client_info": {
+          "package_name": "cc.lupine.quickbid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728987403807-e62r5ntoioe5cmkk140c2723378visui.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cc.lupine.quickbid",
+            "certificate_hash": "abe71918a2b5f76436c08568b85db62998736289"
+          }
+        },
+        {
+          "client_id": "728987403807-8urnpdqe5sljf0uks7jcb33ig7iet9d3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCytqq7lRJIQfA-Nwz7Kp3qNOrtBgAnq9g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728987403807-8urnpdqe5sljf0uks7jcb33ig7iet9d3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
